@@ -1,0 +1,20 @@
+{
+  "name": "skate_park",
+  "version": "1.0.0",
+  "description": "Registro de usuarios para competencia de skate",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Yistler Duran, Angelo Gonzales, Ivan Guerrero, Luis Berrios",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-fileupload": "^1.5.0",
+    "express-handlebars": "^7.1.2",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.14",
+    "pg": "^8.12.0"
+  }
+}

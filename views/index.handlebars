@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+    integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../style/index.css" />
+
+</head>
+
+<body>
+  <h1></h1>
+  <img src="../img/logo_blanco.png" alt="Logo" class="logo">
+  <div class="py-4">
+    <h2>Lista de participantes</h2>
+    <hr />
+    <div class="container">
+      <div class="row justify-content-md-center">
+        <table class="table text-white col-md-8">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Foto</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Años de experiencia</th>
+              <th scope="col">Especialidad</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="skaters-table-body">
+            <!-- Filas generadas dinámicamente -->
+            {{#if skaters}}
+            {{#each skaters}}
+            <tr>
+              <td>{{this.id}}</td>
+              <td><img src="./img/{{this.foto}}.jpg" alt="imgen usuario" class="imgUser"></td>
+              <td>{{this.nombre}}</td>
+              <td>{{this.anos_experiencia}}</td>
+              <td>{{this.especialidad}}</td>
+              <td>
+                {{#if this.estado}} Aprobado {{else}} En revisión{{/if}}
+              </td>
+            </tr>
+            {{/each}}
+            {{/if}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <br>
+  <button>
+    <a href="/login">Iniciar Sesión</a>
+  </button>
+  <button>
+    <a href="/login">Registrarme</a>
+  </button>
+  <br><br>
+  </div>
+  <iframe src="https://open.spotify.com/embed?uri=spotify:playlist:7zBrUJ3XQLgdzKKkqw5Zws" width="600" height="300"
+    frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+</body>
+
+</html>
