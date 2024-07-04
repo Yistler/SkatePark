@@ -3,12 +3,12 @@
 Este proyecto consiste en una plataforma web para la inscripción y gestión de skaters que desean participar en una competencia de Skate organizada por la Municipalidad de Santiago.
 
 ## Las tecnologías y herramientas utilizadas:
-- Express
-- Handlebars
-- PostgreSQL
-- JWT
-- Express-fileupload
-- nodemailer
+- Express (Sevidor con express CRUD)
+- Handlebars (motor de plantillas)
+- PostgreSQL (Bases de datos)
+- JWT (token para verificar usuario)
+- Express-fileupload (subir imagenes)
+- nodemailer (envio de correo para recuperar password con JWT para verificar usuario)
 
 
 ## Estructura de carpetas
