@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const bcrypt = require ('bcrypt');
+const saltRounds = 10;// Número de rondas de salt (puedes ajustar según necesidad)
 
 const pool = new Pool({
     user: 'postgres',
@@ -11,6 +13,7 @@ const pool = new Pool({
     max: 20, // Número máximo de conexiones en el pool
     min: 4,  // Número mínimo de conexiones en el pool
 });
+
 const obtenerCliente = async() =>{
     try{
         const client = await pool.connect();
@@ -27,14 +30,25 @@ const verifyUser = async(email, password) =>{
         client = await obtenerCliente();
         try{
             const consulta = {
-                text: `SELECT email, rol FROM skaters WHERE email = $1 AND password = $2`,
-                values: [email, password]
+                text: `SELECT email, password, rol FROM skaters WHERE email = $1`,
+                values: [email]
             }
             const result = await client.query(consulta);
+            console.log(result.rows);
             if(result.rows.length === 0){
-                return null; //devuelve null si no encontro el usuario
+                return "Email incorrecto"; //devuelve null si no encontro el usuario
             }
-            return result.rows//devuelve el resultado si se encontro
+            const user = result.rows[0];
+            const storedHash = user.password;//hash almacenado en la base de datos
+
+            //compara la contraseña pasada con el hash almacenado
+            const isMatch = await bcrypt.compare(password, storedHash);
+
+            if(isMatch){
+                return result.rows//devuelve el resultado si se encontro
+            }else{
+                return "password incorrecta";
+            } 
         }catch(err){
             console.error("Error al buscar verificar usuario", err);
             return null;
@@ -46,34 +60,49 @@ const verifyUser = async(email, password) =>{
             client.release();
         }
     }
-}
+} 
 
-const register = async(name, email, password, experiencie, specialty, img)=>{
+const register = async (name, email, password, experiencie, specialty, img) => {
     let client;
-    try{
+    try {
         client = await obtenerCliente();
-        try{
+        try {
+            // Hash de la contraseña
+            const hash = await new Promise((resolve, reject) => {
+                bcrypt.hash(password, saltRounds, (err, hash) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(hash);
+                    }
+                });
+            });
+
+            // Consulta para insertar el nuevo usuario
             const consulta = {
                 text: `INSERT INTO skaters (nombre, email, password, anos_experiencia, especialidad, foto, estado) VALUES($1, $2, $3, $4, $5, $6, $7)`,
-                values: [name, email, password, experiencie, specialty, img, false]
-            }
+                values: [name, email, hash, experiencie, specialty, img, false]
+            };
+
             const result = await client.query(consulta);
-            /* if(result.rows.length === 0){
-                return null; //devuelve null si no encontro el usuario
-            } */
-            return result.rows//devuelve el resultado si se encontro
-        }catch(err){
+
+            // Devuelve el resultado de la consulta
+            return result.rows;
+
+        } catch (err) {
             console.error("Error al crear usuario", err);
             return null;
         }
-    }catch(err){
-        console.error("Error de conexion al llamar la funcion", err)
-    }finally{
-        if(client){
+    } catch (err) {
+        console.error("Error de conexión al llamar la función", err);
+        return null;
+    } finally {
+        if (client) {
             client.release();
         }
     }
-}
+};
+
 
 const obtenerUser = async(email)=>{
     let client;
@@ -124,7 +153,6 @@ const obtenerSkaters = async()=>{
     }
 }
 
-
 const actualizarUsuario = async(email, nombre, password, anos_experiencia, especialidad) => {
     let client;
     try {
@@ -148,6 +176,7 @@ const actualizarUsuario = async(email, nombre, password, anos_experiencia, espec
         }
     }
 }
+
 const eliminarUsuario = async(email) => {
     let client;
     try {
@@ -190,5 +219,30 @@ const cambiarEstado = async(skaterId, estado)=>{
         console.error("Error de conexion", error)
     }
 }
+
+//Funcion para registrar usuario administrador
+const registrarAdmin = async() =>{
+    let client;
+    try{
+        client = await obtenerCliente();
+        try{
+            //hash contraseña de admin
+            const password = 'admin';
+            const hashedPass = await bcrypt.hash(password, saltRounds);
+            const query = {
+                text: "INSERT INTO skaters  (email, nombre, password, anos_experiencia, especialidad, foto, estado, rol) values ($1, $2, $3, $4, $5, $6, $7, $8)",
+                values: ['admin@gmail.com', 'Admin', hashedPass, 0, 'N/A', 'img-admin', true, 'admin']
+            }
+            await client.query(query);
+        }catch(err){
+            console.error("Error al registrar administrador");
+        }
+    }catch(err){
+        console.error("Error de conexión", err);
+    }finally{
+        client.release();
+    }
+}
+//registrarAdmin();
 
 module.exports = { verifyUser, register, obtenerUser, obtenerSkaters, actualizarUsuario, eliminarUsuario, cambiarEstado };

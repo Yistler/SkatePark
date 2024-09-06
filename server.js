@@ -121,7 +121,11 @@ app.get("/perfil", async (req, res) => {
             )
         } else {
             const user = await obtenerUser(decode.payload)
-            res.render("perfil", { layout: "perfil", usuario: user[0] });
+            if(user == null){
+                res.status(404).send("usuario no encontrado");
+            }else{
+                res.render("perfil", { layout: "perfil", usuario: user[0] });
+            }
         }
     });
 });
@@ -157,7 +161,7 @@ app.post("/recuperarPassword", (req, res) => {
         payload: email,
         exp: Math.floor(Date.now() / 1000) + 500,
     }, "secretKey")
-    let asunto = "Recuperar password"
+    let asunto = "Recuperar password SkatePark"
     const url = `http://localhost:3000/perfil?token=${token}`
     enviarEmail(email, asunto, url);
     res.send("se envio el correo revisa")
