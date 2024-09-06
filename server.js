@@ -50,7 +50,7 @@ app.post("/session", async (req, res) => {
     try {
         const user = await verifyUser(email, password);
         console.log("/session user->", user)
-        if (user) {
+        if (user[0].rol == 'user') {
             const token = jwt.sign(
                 {
                     payload: user[0].email,
@@ -59,7 +59,18 @@ app.post("/session", async (req, res) => {
                 "secretKey"
             )
             res.redirect(`http://localhost:3000/perfil?token=${token}`);
-        } else {
+
+        }else if(user[0].rol == 'admin'){
+            const token = jwt.sign(
+                {
+                    payload: user[0].email,
+                    exp: Math.floor(Date.now() / 1000) + 500,
+                },
+                "secretKey"
+            )
+            res.redirect(`http://localhost:3000/admin?token=${token}`);
+        }
+         else {
             console.log("No se encontro usuario o hubo un error", user)
             res.status(404).send("usuario no encontrado");
         }
@@ -113,7 +124,28 @@ app.get("/perfil", async (req, res) => {
             res.render("perfil", { layout: "perfil", usuario: user[0] });
         }
     });
-})
+});
+
+app.get("/admin", async (req, res) => {
+    const { token } = req.query;
+    jwt.verify(token, "secretKey", async (err, decode) =>{
+        if(err) {
+            res.status(401).send(
+                {
+                    error: "401 Unauthorized",
+                    message: err.message
+                }
+            )
+        } else {
+            const data = await obtenerSkaters()
+            res.render("admin", { layout: "admin", skaters: data });
+        }
+    })
+});
+/*app.get("/admin", async (req, res) => {
+    const data = await obtenerSkaters()
+    res.render("admin", { layout: "admin", skaters: data });
+});*/
 
 app.get("/recuperar", (req, res) => {
     res.render("recuperarPassword", { layout: "recuperarPassword" })
@@ -167,10 +199,6 @@ app.post("/deleteUser", async (req, res) => {
     }
 });
 
-app.get("/admin", async (req, res) => {
-    const data = await obtenerSkaters()
-    res.render("admin", { layout: "admin", skaters: data });
-});
 
 app.post("/estado", async(req, res)=>{
     const { skaterId, estado } = req.body;

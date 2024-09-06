@@ -27,7 +27,7 @@ const verifyUser = async(email, password) =>{
         client = await obtenerCliente();
         try{
             const consulta = {
-                text: `SELECT email, estado FROM skaters WHERE email = $1 AND password = $2`,
+                text: `SELECT email, rol FROM skaters WHERE email = $1 AND password = $2`,
                 values: [email, password]
             }
             const result = await client.query(consulta);
@@ -108,7 +108,8 @@ const obtenerSkaters = async()=>{
         client = await obtenerCliente();
         try {
             const consulta = {
-                text: `SELECT id, foto, nombre, anos_experiencia, especialidad, estado from skaters`
+                text: `SELECT id, foto, nombre, anos_experiencia, especialidad, estado from skaters where rol = $1`,
+                values: ['user']
             }
             const result = await client.query(consulta);
             if(result.rows.length === 0){
